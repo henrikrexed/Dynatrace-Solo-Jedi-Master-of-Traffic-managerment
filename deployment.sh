@@ -105,6 +105,8 @@ sed -i "s,IP_TO_REPLACE,$IP," istio/istio_gateway.yaml
 #TODO to update this part to create the various Gateway rules
 sed -i "s,IP_TO_REPLACE,$IP," k6/loadtest_job.yaml
 
+#### Isntall Gloo Mesh
+
 
 #### Deploy the Dynatrace Operator
 kubectl create namespace dynatrace

@@ -41,6 +41,12 @@ telemetryCollectorCustomization:
   extraExporters:
     logging/mesh:
       verbosity: normal
+  extraProcessors:
+    cumulativetodelta:
+      include:
+        metrics:
+            - "*"
+        match_type: regexp
   extraPipelines:
     logs/accesslogs:
       receivers:
@@ -71,21 +77,13 @@ telemetryGatewayCustomization:
     otlphttp/dt:
       endpoint: https://ikq13173.apps.dynatrace.com/api/v2/otlp
       headers:
-        Authorization: "Api-Token dt0c01.HMDQQMGHBK656SSJZB5FDQSG.DEVC2RYT5OAIC2ZURSU33FQS6IRVTQEKHFAMDPFYTT5IKN3OUZ6HY35TJJWLL3DP"
-  # extraProcessors:
-  #   resource/mesh:
-  #     attributes:
-  #     - action: insert
-  #       key: loki.format
-  #       value: json
-  #     - action: insert
-  #       key: loki.resource.labels
-  #       value: namespace, instance
-  #   attributes/mesh:
-  #     actions:
-  #       - action: insert
-  #         key: loki.attribute.labels
-  #         value: istio_client_type
+        Authorization: "Api-Token "
+  extraProcessors:
+    cumulativetodelta:
+      include:
+        metrics:
+            - "*"
+        match_type: regexp
   extraPipelines:
     logs/dt:
       receivers: [otlp]
@@ -99,6 +97,14 @@ telemetryGatewayCustomization:
     traces/dt: 
       receivers: [otlp]
       processors: [batch]
+      exporters:
+        - otlphttp/dt
+        - logging/mesh
+    metrics/dt:
+      receivers:
+        - otlp
+        - prometheus
+      processors: [batch, cumulativetodelta, memory_limiter]
       exporters:
         - otlphttp/dt
         - logging/mesh

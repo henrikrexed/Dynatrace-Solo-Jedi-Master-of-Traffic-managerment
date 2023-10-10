@@ -41,6 +41,12 @@ telemetryCollectorCustomization:
   extraExporters:
     logging/mesh:
       verbosity: normal
+  extraProcessors:
+    cumulativetodelta:
+      include:
+        metrics:
+            - "*"
+        match_type: regexp
   extraPipelines:
     logs/accesslogs:
       receivers:
@@ -72,20 +78,12 @@ telemetryGatewayCustomization:
       endpoint: $DT_ENDPOINT/api/v2/otlp
       headers:
         Authorization: "Api-Token $DT_API_TOKEN"
-  # extraProcessors:
-  #   resource/mesh:
-  #     attributes:
-  #     - action: insert
-  #       key: loki.format
-  #       value: json
-  #     - action: insert
-  #       key: loki.resource.labels
-  #       value: namespace, instance
-  #   attributes/mesh:
-  #     actions:
-  #       - action: insert
-  #         key: loki.attribute.labels
-  #         value: istio_client_type
+  extraProcessors:
+    cumulativetodelta:
+      include:
+        metrics:
+            - "*"
+        match_type: regexp
   extraPipelines:
     logs/dt:
       receivers: [otlp]
@@ -99,6 +97,14 @@ telemetryGatewayCustomization:
     traces/dt: 
       receivers: [otlp]
       processors: [batch]
+      exporters:
+        - otlphttp/dt
+        - logging/mesh
+    metrics/dt:
+      receivers:
+        - otlp
+        - prometheus
+      processors: [batch, cumulativetodelta, memory_limiter]
       exporters:
         - otlphttp/dt
         - logging/mesh
