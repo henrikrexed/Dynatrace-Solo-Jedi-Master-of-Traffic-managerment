@@ -104,5 +104,5 @@ spec:
       pipelines:
         metrics:
           receivers: [otlp]
-          processors: [memory_limiter,filter,k8sattributes,batch]
+          processors: [memory_limiter,filter,cumulativetodelta,k8sattributes,batch]
           exporters: [otlphttp]
