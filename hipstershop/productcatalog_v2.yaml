@@ -36,7 +36,7 @@ spec:
       containers:
         - name: server
           # image: registry.lab.dynatrace.org/cloudplatform/hipster-shop-productcatalogservice
-          image: gcr.io/dynatrace-demoability/productcatalogservice:dd747d8-dirty
+          image: gcr.io/dynatrace-demoability/online-boutique/productcatalogservice:bb9f28d
           ports:
             - containerPort: 3550
           env:

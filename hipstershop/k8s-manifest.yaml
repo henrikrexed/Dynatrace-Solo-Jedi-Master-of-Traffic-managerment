@@ -39,7 +39,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/emailservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/emailservice:bb9f28d
           ports:
             - containerPort: 8080
           env:
@@ -119,7 +119,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/checkoutservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/checkoutservice:bb9f28d
           ports:
             - containerPort: 5050
           readinessProbe:
@@ -219,7 +219,7 @@ spec:
         - name: demo-registry
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/recommendationservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/recommendationservice:bb9f28d
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -309,7 +309,7 @@ spec:
         - name: server
           # both look good
           #image: registry.lab.dynatrace.org/cloudplatform/hipster-shop-frontend
-          image: gcr.io/dynatrace-demoability/frontend:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/frontend:bb9f28d
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -476,7 +476,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/paymentservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/paymentservice:bb9f28d
           ports:
             - containerPort: 50051
           env:
@@ -552,7 +552,7 @@ spec:
       containers:
         - name: server
           # image: registry.lab.dynatrace.org/cloudplatform/hipster-shop-productcatalogservice
-          image: gcr.io/dynatrace-demoability/productcatalogservice:dd747d8-dirty
+          image: gcr.io/dynatrace-demoability/online-boutique/productcatalogservice:bb9f28d
           ports:
             - containerPort: 3550
           env:
@@ -718,7 +718,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/currencyservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/currencyservice:bb9f28d
           ports:
             - name: grpc
               containerPort: 7000
@@ -798,7 +798,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/dynatrace-demoability/shippingservice:9e830c2
+          image: gcr.io/dynatrace-demoability/online-boutique/shippingservice:bb9f28d
           ports:
             - containerPort: 50051
           env:
