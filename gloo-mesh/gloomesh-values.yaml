@@ -41,22 +41,11 @@ telemetryCollectorCustomization:
   extraExporters:
     logging/mesh:
       verbosity: normal
-  extraProcessors:
-    cumulativetodelta:
-      include:
-        metrics:
-            - "*"
-        match_type: regexp
-    filter:
-      error_mode: ignore
-      metrics:
-        metric:
-          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
   extraPipelines:
     logs/accesslogs:
       receivers:
         - otlp
-      processors: [batch, memory_limiter]
+      processors: [memory_limiter, batch]
       exporters: 
         - logging/mesh
         - otlp
@@ -89,6 +78,11 @@ telemetryGatewayCustomization:
         metrics:
             - "*"
         match_type: regexp
+    filter:
+      error_mode: ignore
+      metrics:
+        metric:
+          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
   extraPipelines:
     logs/dt:
       receivers: [otlp]
