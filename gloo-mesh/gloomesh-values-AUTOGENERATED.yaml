@@ -47,6 +47,11 @@ telemetryCollectorCustomization:
         metrics:
             - "*"
         match_type: regexp
+    filter:
+      error_mode: ignore
+      metrics:
+        metric:
+          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
   extraPipelines:
     logs/accesslogs:
       receivers:
@@ -104,7 +109,7 @@ telemetryGatewayCustomization:
       receivers:
         - otlp
         - prometheus
-      processors: [batch, cumulativetodelta, memory_limiter]
+      processors: [batch, filter, cumulativetodelta, memory_limiter]
       exporters:
         - otlphttp/dt
         - logging/mesh
