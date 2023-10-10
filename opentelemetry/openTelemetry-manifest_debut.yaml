@@ -81,10 +81,7 @@ spec:
         spike_limit_percentage: 30
      
      cumulativetodelta:
-        include:
-          metrics:
-              - "*"
-          match_type: regexp
+        
 
      filter:
         error_mode: ignore

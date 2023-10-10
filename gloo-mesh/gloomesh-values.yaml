@@ -72,17 +72,13 @@ telemetryGatewayCustomization:
       endpoint: $DT_ENDPOINT/api/v2/otlp
       headers:
         Authorization: "Api-Token $DT_API_TOKEN"
-  # extraProcessors:
-  #   cumulativetodelta:
-  #     include:
-  #       metrics:
-  #           - "*"
-  #       match_type: regexp
-  #   filter:
-  #     error_mode: ignore
-  #     metrics:
-  #       metric:
-  #         - 'type == METRIC_DATA_TYPE_HISTOGRAM'
+   extraProcessors:
+     cumulativetodelta:
+     filter:
+       error_mode: ignore
+       metrics:
+         metric:
+           - 'type == METRIC_DATA_TYPE_HISTOGRAM'
   extraPipelines:
     logs/dt:
       receivers: [otlp]
@@ -93,18 +89,18 @@ telemetryGatewayCustomization:
       exporters: 
         - otlphttp/dt
         # - logging/mesh
-    # traces/dt: 
-    #   receivers: [otlp]
-    #   processors: [batch]
-    #   exporters:
-    #     - otlphttp/dt
-    #     - logging/mesh
-    # metrics/dt:
-    #   receivers:
-    #     - otlp
-    #     - prometheus
-    #   # processors: [batch,filter, cumulativetodelta, memory_limiter]
+    traces/dt:
+       receivers: [otlp]
+       processors: [batch]
+       exporters:
+         - otlphttp/dt
+         - logging/mesh
+     metrics/dt:
+       receivers:
+         - otlp
+         - prometheus
+       processors: [batch,filter, cumulativetodelta, memory_limiter]
     #   processors: [batch, memory_limiter]
-    #   exporters:
-    #     # - otlphttp/dt
+       exporters:
+         - otlphttp/dt
     #     - logging/mesh
