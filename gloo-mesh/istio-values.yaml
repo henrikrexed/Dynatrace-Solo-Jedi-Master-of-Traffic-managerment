@@ -1,0 +1,105 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  profile: minimal
+  revision: 1-17
+  hub: us-docker.pkg.dev/gloo-mesh/istio-workshops
+  tag: 1.17.2-solo
+  meshConfig:
+    accessLogFile: /dev/stdout
+    accessLogFormat: |
+      [ACCES_LOGS] [%START_TIME%] "downstream_tls_version": "%DOWNSTREAM_TLS_VERSION%" "method": "%REQ(:METHOD)%" "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" "protocol": "%PROTOCOL%" "connection_termination_details": "%CONNECTION_TERMINATION_DETAILS%" "response_code": "%RESPONSE_CODE%" "response_flags": "%RESPONSE_FLAGS%" "response_code_details": "%RESPONSE_CODE_DETAILS%" "traceId": "%REQ(x-b3-traceid)%" "upstream_service_time": "%REQ(x-envoy-upstream-service-time)%" "upstream_local_address": "%UPSTREAM_LOCAL_ADDRESS%" "duration": "%DURATION%" "upstream_transport_failure_reason": "%UPSTREAM_TRANSPORT_FAILURE_REASON%" "route_name": "%ROUTE_NAME%" "downstream_local_address": "%DOWNSTREAM_LOCAL_ADDRESS%" "user_agent": "%REQ(USER-AGENT)%" "start_time": "%START_TIME%" "request_id": "%REQ(X-REQUEST-ID)%" "upstream_host": "%UPSTREAM_HOST%" "x_forwarded_for": "%REQ(X-FORWARDED-FOR)%" "requested_server_name": "%REQUESTED_SERVER_NAME%" "bytes_received": "%BYTES_RECEIVED%" "istio_policy_status": "-" "bytes_sent": "%BYTES_SENT%" "upstream_cluster": "%UPSTREAM_CLUSTER%" "downstream_remote_address": "%DOWNSTREAM_REMOTE_ADDRESS%" "authority": "%REQ(:AUTHORITY)%"
+    extensionProviders:
+      # - name: envoyFileAccessLog
+      #   envoyFileAccessLog:
+      #     path: /dev/stdout
+      #     logFormat:
+      #       labels:
+      #         "istio_client_type": "envoyFileAccessLog"
+      #         "instance": "%ENVIRONMENT(POD_NAME)%"
+      #         "namespace": "%ENVIRONMENT(POD_NAMESPACE)%"
+      #         "startTime": "[%START_TIME%]"
+      #         "method": "%REQ(:METHOD)%"
+      #         "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+      #         "protocol": "%PROTOCOL%"
+      #         "reponseCode": "%RESPONSE_CODE%"
+      #         "reponseFlags": "%RESPONSE_FLAGS%"
+      #         "failureRease": "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
+      #         "bytesReceived": "%BYTES_RECEIVED% %BYTES_SENT%"
+      #         "duration": "%DURATION%"
+      #         "envoyUpstreamServiceTime": "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+      #         "forwardedFor": "%REQ(X-FORWARDED-FOR)%"
+      #         "userAgent": "%REQ(USER-AGENT)%"
+      #         "requestID": "%REQ(X-REQUEST-ID)%"
+      #         "authority": "%REQ(:AUTHORITY)%"
+      #         "host": "%UPSTREAM_HOST%"
+      #         "upstreamCluster": "%UPSTREAM_CLUSTER%"
+      #         "upstreamLocalAdress": "%UPSTREAM_LOCAL_ADDRESS%"
+      #         "downstreamLocalAddress": "%DOWNSTREAM_LOCAL_ADDRESS%"
+      #         "downstreamRemoteAddress": "%DOWNSTREAM_REMOTE_ADDRESS%"
+      #         "requestedServerName": "%REQUESTED_SERVER_NAME%"
+      #         "routeName": "%ROUTE_NAME%"
+      #         "traceparent": "%REQ(traceparent)%"
+      #         "xForwardedClientCert" : "%REQ(x-forwarded-client-cert)%"
+
+      - name: envoyOtelAls
+        envoyOtelAls:
+          service: "gloo-telemetry-collector.gloo-mesh.svc.cluster.local"
+          port: "4317"
+          logFormat:
+            text: |
+              [ACCESS LOGS OTEL] [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %RESPONSE_CODE_DETAILS% %CONNECTION_TERMINATION_DETAILS% "%UPSTREAM_TRANSPORT_FAILURE_REASON%" %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%" %UPSTREAM_CLUSTER% %UPSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS% %REQUESTED_SERVER_NAME% %ROUTE_NAME% "traceparent": "%REQ(traceparent)%"
+            labels:
+              "istio_client_type": "envoyOtelAls"
+              "startTime": "[%START_TIME%]"
+              "method": "%REQ(:METHOD)%"
+              "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+              "protocol": "%PROTOCOL%"
+              "reponseCode": "%RESPONSE_CODE%"
+              "authority": "%REQ(:AUTHORITY)%"
+              "host": "%UPSTREAM_HOST%"
+              "traceparent": "%REQ(traceparent)%"
+              "instance": "%ENVIRONMENT(POD_NAME)%"
+              "namespace": "%ENVIRONMENT(POD_NAMESPACE)%"
+              "xForwardedClientCert" : "%REQ(x-forwarded-client-cert)%"
+      - name: opentelemetry
+        opentelemetry:
+          service: "gloo-telemetry-collector.gloo-mesh.svc.cluster.local"
+          port: "4317"
+    defaultProviders:
+      accessLogging:
+        - envoyOtelAls
+      tracing:
+        - opentelemetry
+    defaultConfig:
+      holdApplicationUntilProxyStarts: true
+      proxyMetadata:
+        ISTIO_META_DNS_CAPTURE: "true"
+        ISTIO_META_DNS_AUTO_ALLOCATE: "true"
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+    rootNamespace: istio-system
+  components:
+    ingressGateways:
+      - name: ingressgateway
+        enabled: true
+        namespace: istio-gateways
+    pilot:
+      k8s:
+        env:
+          - name: AUTO_RELOAD_PLUGIN_CERTS
+            value: "true"
+          - name: PILOT_SKIP_VALIDATE_TRUST_DOMAIN
+            value: "true"
+          - name: PILOT_ENABLE_K8S_SELECT_WORKLOAD_ENTRIES
+            value: "false"
+  values:
+    global:
+      meshID: gloomesh
+      multiCluster:
+        clusterName: mgmt-cluster
+      network: mgmt-cluster
+    gateways:
+      istio-ingressgateway:
+        autoscaleEnabled: false
+        injectionTemplate: gateway
