@@ -31,6 +31,10 @@ spec:
         app.kubernetes.io/component: emailservice
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: emailservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -56,10 +60,8 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 300m
               memory: 128Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -110,6 +112,10 @@ spec:
         app.kubernetes.io/instance: hipster-shop
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: checkoutservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       containers:
         - name: server
@@ -152,8 +158,6 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -204,6 +208,10 @@ spec:
         app.kubernetes.io/instance: hipster-shop
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: recommendationservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       # imagePullsecrets required for perform2019????
@@ -236,12 +244,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 220Mi
+              memory: 64Mi
             limits:
               cpu: 200m
-              memory: 450Mi
-      nodeSelector:
-        node-type: worker
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -291,6 +297,13 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: frontend
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+        proxy.istio.io/config: |-
+          proxyStatsMatcher:
+            inclusionRegexps:
+            - ".*http_local_rate_limit.*"
     spec:
       containers:
         - name: server
@@ -342,13 +355,11 @@ spec:
           #   value: "jaeger-collector:14268"
           resources:
             requests:
-              cpu: 100m
+              cpu: 250m
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 300m
               memory: 128Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -366,7 +377,6 @@ spec:
       port: 80
       targetPort: 8080
 ---
-
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -423,13 +433,11 @@ spec:
                       key: dt_api_token
               resources:
                 requests:
-                  cpu: 300m
-                  memory: 256Mi
+                  cpu: 100m
+                  memory: 64Mi
                 limits:
-                  cpu: 500m
-                  memory: 512Mi
-          nodeSelector:
-            node-type: worker
+                  cpu: 200m
+                  memory: 128Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -461,6 +469,9 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: paymentservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -471,6 +482,8 @@ spec:
           env:
             - name: PORT
               value: "50051"
+            - name: MEMORYLEAK
+              value: "0"
           readinessProbe:
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:50051"]
@@ -479,13 +492,11 @@ spec:
               command: ["/bin/grpc_health_probe", "-addr=:50051"]
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 64Mi
             limits:
               cpu: 200m
-              memory: 128Mi
-      nodeSelector:
-        node-type: worker
+              memory: 1024Mi
 ---
 apiVersion: v1
 kind: Service
@@ -532,6 +543,10 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: productcatalogservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -543,6 +558,8 @@ spec:
           env:
             - name: PORT
               value: "3550"
+            - name: EXTRA_LATENCY
+              value: "1s"
           # - name: DISABLE_STATS
           #   value: "1"
           # - name: DISABLE_TRACING
@@ -559,13 +576,11 @@ spec:
               command: ["/bin/grpc_health_probe", "-addr=:3550"]
           resources:
             requests:
-              cpu: 100m
+              cpu: 20m
               memory: 64Mi
             limits:
-              cpu: 150m
+              cpu: 50m
               memory: 120Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -614,6 +629,10 @@ spec:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: cartservice
         app.kubernetes.io/version: "1.0.0"
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -630,11 +649,11 @@ spec:
               value: "0.0.0.0"
           resources:
             requests:
-              cpu: 300m
-              memory: 512Mi
+              cpu: 100m
+              memory: 64Mi
             limits:
               cpu: 300m
-              memory: 512Mi
+              memory: 1024Mi
           readinessProbe:
             initialDelaySeconds: 15
             exec:
@@ -644,8 +663,6 @@ spec:
             periodSeconds: 10
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -693,6 +710,10 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: currencyservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -721,10 +742,8 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 300m
               memory: 128Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -772,6 +791,10 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: shippingservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       containers:
         - name: server
@@ -803,8 +826,6 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -852,6 +873,10 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: redis-cart
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       containers:
         - name: redis
@@ -872,9 +897,9 @@ spec:
           resources:
             limits:
               memory: 256Mi
-              cpu: 125m
+              cpu: 700m
             requests:
-              cpu: 70m
+              cpu: 400m
               memory: 200Mi
         - name: redis-exporter
           image: 'oliver006/redis_exporter:latest'
@@ -885,8 +910,6 @@ spec:
           ports:
             - containerPort: 9121
               protocol: TCP
-      nodeSelector:
-        node-type: worker
       volumes:
         - name: redis-data
           emptyDir: {}
@@ -937,6 +960,10 @@ spec:
       annotations:
         app.kubernetes.io/part-of: hipster-shop
         app.kubernetes.io/name: adservice
+        metrics.dynatrace.com/port: '15020'
+        metrics.dynatrace.com/scrape: 'true'
+        metrics.dynatrace.com/path: '/stats/prometheus'
+
     spec:
       terminationGracePeriodSeconds: 5
       containers:
@@ -949,11 +976,11 @@ spec:
               value: "9555"
           resources:
             requests:
-              cpu: 200m
+              cpu: 100m
               memory: 200Mi
             limits:
-              cpu: 300m
-              memory: 300Mi
+              cpu: 200m
+              memory: 400Mi
           readinessProbe:
             initialDelaySeconds: 20
             periodSeconds: 15
@@ -964,8 +991,6 @@ spec:
             periodSeconds: 15
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:9555"]
-      nodeSelector:
-        node-type: worker
 ---
 apiVersion: v1
 kind: Service
@@ -982,4 +1007,3 @@ spec:
     - name: grpc
       port: 9555
       targetPort: 9555
----

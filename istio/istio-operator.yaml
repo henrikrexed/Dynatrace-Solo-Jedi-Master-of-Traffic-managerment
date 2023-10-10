@@ -4,14 +4,16 @@ spec:
   profile: demo
   meshConfig:
     accessLogFile: /dev/stdout
-    defaultProviders:
-      tracing:
-        - "otelp"
-      accessLogging:
-        - "envoylogs"
     defaultConfig:
       tracing:
         sampling: 100
+        openCensusAgent:
+          address: oteld-collector.default.svc.cluster.local:55678
+    defaultProviders:
+      tracing:
+        - "opencensus"
+      accessLogging:
+        - "envoylogs"
     enablePrometheusMerge: true
     enableTracing: true
     extensionProviders:
@@ -23,3 +25,9 @@ spec:
         opentelemetry:
           service: "oteld-collector.default.svc.cluster.local"
           port: 4317
+      - name: "opencensus"
+        opencensus:
+          service: "oteld-collector.default.svc.cluster.local"
+          port: 55678
+          context:
+            - W3C_TRACE_CONTEXT

@@ -62,7 +62,7 @@ curl -L https://istio.io/downloadIstio | sh -
 This command download the latest version of istio ( in our case istio 1.17.2) compatible with our operating system.
 2. Add istioctl to you PATH
 ```shell
-cd istio-1.17.2
+cd istio-1.19.0
 ```
 this directory contains samples with addons . We will refer to it later.
 ```shell
@@ -125,6 +125,68 @@ chmod 777 deployment.sh
 ./deployment.sh  --clustername "${NAME}" --dturl "${DT_TENANT_URL}" --dtoperatortoken "${API_TOKEN}" --dtingesttoken "${DATA_INGEST_TOKEN}" 
 ```
 
+
+### 6. ServiceMesh Features
+
+#### 1. Request timeout
+The productcatalog service is responding in around 1s, but with load the response time can heavily increase.
+Let's protect all the other services relying on the product catalog by defining a request timeout rule.
+```shell
+kubectl apply -f istio/request_timeout.yaml -n hipster-shop
+```
+let's run a load test
+```shell
+kubectl apply -f k6/loadtest_job.yaml -n hipster-shop
+```
+
+now all the service relying on the productcalalog won't get the list of products.
+so the impact is that the frontend should generate an error due to the missing product list:
+<p align="center"><img src="/image/timeout.png" width="40%" alt="data token" /></p>
+
+#### 2. Rate Limit
+To illustrate the usage of the rate limit we won't apply it on the productcatalog service , because it receives a limited workload.
+Therefore we would apply it on the frontend service taking in peak hours 550 requests.
+The rate limit will only accept 400 requests.
+```shell
+kubectl apply -f istio/rate_limit.yaml
+```
+Once applied , we shoud get the following page , once the frontend gets heavy traffic:
+<p align="center"><img src="/image/ratelimit_front.png" width="40%" alt="data token" /></p>
+
+
+To keep track on the rate limit we need to enable the envoy metrics produced for rate limit feature.
+to enable it we need to annotate the workload that has a rate limit rule with the following annotation:
+```yaml
+annotations:
+    proxy.istio.io/config: |-
+      proxyStatsMatcher:
+        inclusionRegexps:
+        - ".*http_local_rate_limit.*"
+```
+
+As a consequence we could Graph the number request that has been rate limit
+<p align="center"><img src="/image/rate_limit_metric.png" width="40%" alt="data token" /></p>
+
+With the metric `istio_rate_http_local_rate_limit_rate_limited.count` you can then imagine to create alerts once the value is above A or 10.
+
+#### 3. Circuit Breaker
+Let's create a circuit breaker rule on the productcatalog service.
+
+```shell
+kubectl apply -f istio/circuit_Break.yaml
+```
+To keep track on all the potential issues related to the circuit break rule created, we need to keep track on the following metric:
+`upstream_rq_pending_overflow`
+
+#### 4. Traffic Split
+let's deploy the v1.1.0 resolving the latency issue on the productcatalog service
+```shell
+kubectl apply -f hipstershop/productcatalog_v2.yaml -n hipster-shop
+```
+Then we want to create the traffic split rule where 80% of the traffic will be sent to the v1.0 and 20% to v1.1
+```shell
+kubectl apply -f istio/traficsplit.yaml -n hipster-shop
+```
 
 
 #### 4.Chaos Experiments
