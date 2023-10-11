@@ -132,7 +132,7 @@ spec:
       forwardTo:
         destinations:
           - ref:
-              name: hipster-shop
+              name: frontend
               namespace: hipster-shop
             port:
-              number: 9090
+              number: 80

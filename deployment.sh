@@ -92,7 +92,7 @@ kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releas
 IP=""
 while [ -z $IP ]; do
   echo "Waiting for external IP"
-  IP=$(kubectl get svc istio-ingressgateway -n istio-gateways -ojson | jq -j '.status.loadBalancer.ingress[0].*')
+  IP=$(kubectl -n istio-gateways get svc -l istio=ingressgateway -o jsonpath='{.items[0].status.loadBalancer.ingress[0].*}')
   [ -z "$IP" ] && sleep 10
 done
 echo 'Found external IP: '$IP
@@ -125,7 +125,7 @@ kubectl apply -f hipstershop/k8s-manifest.yaml -n hipster-shop
 #apply Gloo Mesh policies
 kubectl apply -f ./gloo-mesh/connectionpolicy.yaml
 kubectl apply -f ./gloo-mesh/outlierdetectionpolicy.yaml
-kubectl apply -f ./gloo-mesh/retrytimeoutpolicy.yaml
+# kubectl apply -f ./gloo-mesh/retrytimeoutpolicy.yaml
 
 
 kubectl apply -f k6/loadtest_job.yaml -n hipster-shop
@@ -140,7 +140,6 @@ helm install chaos litmuschaos/litmus --namespace=litmus --set upgradeAgent.node
 
 
 #Deploy the ingress rules
-kubectl apply -f istio/istio_gateway.yaml
 echo "--------------Demo--------------------"
 echo "url of the demo: "
 echo " Hipster-shop url : http://hipstershop.$IP.nip.io"
