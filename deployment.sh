@@ -122,6 +122,9 @@ kubectl label namespace hipster-shop istio.io/rev=1-19
 kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN" -n hipster-shop
 kubectl apply -f hipstershop/k8s-manifest.yaml -n hipster-shop
 
+#apply gloo mesh resources
+kubectl apply -f ./gloo-mesh/gloomesh-resources.yaml
+
 #apply Gloo Mesh policies
 kubectl apply -f ./gloo-mesh/connectionpolicy.yaml
 kubectl apply -f ./gloo-mesh/outlierdetectionpolicy.yaml
