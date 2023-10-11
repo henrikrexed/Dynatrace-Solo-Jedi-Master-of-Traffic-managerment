@@ -1,0 +1,13 @@
+apiVersion: resilience.policy.gloo.solo.io/v2
+kind: RetryTimeoutPolicy
+metadata:
+  name: request-timeout
+  namespace: hipster-shop
+spec:
+  applyToDestinations:
+  - kind: SERVICE
+    selector:
+      labels:
+        app: productcatalog
+  config:
+    requestTimeout: 2s

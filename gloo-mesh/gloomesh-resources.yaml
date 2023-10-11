@@ -1,0 +1,138 @@
+apiVersion: admin.gloo.solo.io/v2
+kind: KubernetesCluster
+metadata:
+  name: mgmt-cluster
+  namespace: gloo-mesh
+spec:
+  clusterDomain: cluster.local
+---
+apiVersion: admin.gloo.solo.io/v2
+kind: Workspace
+metadata:
+  name: gateways
+  namespace: gloo-mesh
+spec:
+  workloadClusters:
+  - name: mgmt-cluster
+    namespaces:
+    - name: istio-gateways
+    - name: gloo-mesh-addons
+---
+apiVersion: admin.gloo.solo.io/v2
+kind: WorkspaceSettings
+metadata:
+  name: gateways
+  namespace: istio-gateways
+spec:
+  importFrom:
+  - workspaces:
+    - selector:
+        allow_ingress: "true"
+    resources:
+    - kind: SERVICE
+    - kind: ALL
+      labels:
+        expose: "true"
+  exportTo:
+  - workspaces:
+    - selector:
+        allow_ingress: "true"
+    resources:
+    - kind: SERVICE
+---
+apiVersion: admin.gloo.solo.io/v2
+kind: Workspace
+metadata:
+  name: hipster-shop
+  namespace: gloo-mesh
+  labels:
+    allow_ingress: "true"
+spec:
+  workloadClusters:
+  - name: mgmt-cluster
+    namespaces:
+    - name: hipster-shop
+---
+apiVersion: admin.gloo.solo.io/v2
+kind: WorkspaceSettings
+metadata:
+  name: hipster-shop
+  namespace: hipster-shop
+spec:
+  importFrom:
+  - workspaces:
+    - name: gateways
+    resources:
+    - kind: SERVICE
+  exportTo:
+  - workspaces:
+    - name: gateways
+    resources:
+    - kind: ALL
+      labels:
+        expose: "true"
+    - kind: SERVICE
+      labels:
+        app: frontend
+---
+apiVersion: networking.gloo.solo.io/v2
+kind: VirtualGateway
+metadata:
+  name: north-south-gw
+  namespace: istio-gateways
+spec:
+  workloads:
+    - selector:
+        labels:
+          istio: ingressgateway
+  listeners: 
+    - http: {}
+      port:
+        number: 80
+      allowedRouteTables:
+        - host: '*'
+---
+apiVersion: networking.gloo.solo.io/v2
+kind: RouteTable
+metadata:
+  name: main
+  namespace: istio-gateways
+spec:
+  hosts:
+    - '*'
+  virtualGateways:
+    - name: north-south-gw
+      namespace: istio-gateways
+      cluster: mgmt-cluster
+  workloadSelectors: []
+  http:
+    - name: root
+      matchers:
+      - uri:
+          prefix: /
+      delegate:
+        routeTables:
+          - labels:
+              expose: "true"
+        sortMethod: ROUTE_SPECIFICITY
+---
+apiVersion: networking.gloo.solo.io/v2
+kind: RouteTable
+metadata:
+  name: hipster-shop
+  namespace: hipster-shop
+  labels:
+    expose: "true"
+spec:
+  http:
+    - name: hipster-shop
+      matchers:
+      - uri:
+          prefix: /
+      forwardTo:
+        destinations:
+          - ref:
+              name: hipster-shop
+              namespace: hipster-shop
+            port:
+              number: 9090

@@ -31,26 +31,7 @@ telemetryGateway:
   enabled: true
   service:
     type: LoadBalancer
-telemetryCollector:
-  enabled: true
-  config:
-    exporters:
-      otlp:
-        endpoint: gloo-telemetry-gateway.gloo-mesh.svc:4317
-telemetryCollectorCustomization:
-  extraExporters:
-    logging/mesh:
-      verbosity: normal
-  extraPipelines:
-    logs/accesslogs:
-      receivers:
-        - otlp
-      processors: [memory_limiter, batch]
-      exporters: 
-        - logging/mesh
-        - otlp
-telemetryGatewayCustomization:
-  env:
+  extraEnvs:
     - name: DT_ENDPOINT
       valueFrom:
         secretKeyRef:
@@ -65,6 +46,49 @@ telemetryGatewayCustomization:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+telemetryCollector:
+  enabled: true
+  config:
+    exporters:
+      otlp:
+        endpoint: gloo-telemetry-gateway.gloo-mesh.svc:4317
+  service:
+    internalTrafficPolicy: Cluster
+  ports:
+    grpc-otlp:
+      enabled: true
+      containerPort: 4317
+      servicePort: 4317
+      hostPort: 4317
+      protocol: TCP
+      appProtocol: grpc
+    otlp:
+      enabled: false
+      containerPort: 4317
+      servicePort: 4317
+      hostPort: 4317
+      protocol: TCP
+      appProtocol: grpc
+telemetryCollectorCustomization:
+  extraExporters:
+    logging/mesh:
+      verbosity: normal
+  extraPipelines:
+    logs/mesh:
+      receivers:
+        - otlp
+      processors: [memory_limiter, batch]
+      exporters: 
+        - logging/mesh
+        - otlp
+    traces/mesh:
+      receivers:
+        - otlp
+      processors: [memory_limiter, batch]
+      exporters: 
+        - logging/mesh
+        - otlp
+telemetryGatewayCustomization:
   extraExporters:
     logging/mesh:
       verbosity: normal # detailed
@@ -82,25 +106,22 @@ telemetryGatewayCustomization:
   extraPipelines:
     logs/dt:
       receivers: [otlp]
-      processors:
-        - batch
-        # - resource/mesh
-        # - attributes/mesh
+      processors: [memory_limiter, batch]
       exporters: 
         - otlphttp/dt
-        # - logging/mesh
-    traces/dt:
-       receivers: [otlp]
-       processors: [batch]
-       exporters:
-         - otlphttp/dt
-         - logging/mesh
-     metrics/dt:
-       receivers:
-         - otlp
-         - prometheus
-       processors: [batch,filter, cumulativetodelta, memory_limiter]
+        - logging/mesh
+    traces/dt: 
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters:
+        - otlphttp/dt
+        - logging/mesh
+    # metrics/dt:
+    #   receivers:
+    #     - otlp
+    #     - prometheus
+    #   # processors: [batch,filter, cumulativetodelta, memory_limiter]
     #   processors: [batch, memory_limiter]
-       exporters:
-         - otlphttp/dt
+    #   exporters:
+    #     # - otlphttp/dt
     #     - logging/mesh

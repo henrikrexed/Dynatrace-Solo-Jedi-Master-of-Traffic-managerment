@@ -85,28 +85,21 @@ sleep 10
 echo "Deploying the OpenTelemetry Operator"
 kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
 
-
-istioctl install -f istio/istio-operator.yaml --skip-confirmation
-
+#### Isntall Gloo Mesh and Istio
+./run-gloo-mesh.sh
 
 ### get the ip adress of ingress ####
 IP=""
 while [ -z $IP ]; do
   echo "Waiting for external IP"
-  IP=$(kubectl get svc istio-ingressgateway -n istio-system -ojson | jq -j '.status.loadBalancer.ingress[].ip')
+  IP=$(kubectl get svc istio-ingressgateway -n istio-gateways -ojson | jq -j '.status.loadBalancer.ingress[0].*')
   [ -z "$IP" ] && sleep 10
 done
 echo 'Found external IP: '$IP
 
 ### Update the ip of the ip adress for the ingres
 #TODO to update this part to create the various Gateway rules
-sed -i "s,IP_TO_REPLACE,$IP," istio/istio_gateway.yaml
-### Update the ip of the ip adress for the ingres
-#TODO to update this part to create the various Gateway rules
 sed -i "s,IP_TO_REPLACE,$IP," k6/loadtest_job.yaml
-
-#### Isntall Gloo Mesh
-
 
 #### Deploy the Dynatrace Operator
 kubectl create namespace dynatrace
@@ -125,11 +118,14 @@ kubectl apply -f opentelemetry/openTelemetry-manifest_debut.yaml
 
 #deploy demo application
 kubectl create ns hipster-shop
-kubectl label namespace hipster-shop istio-injection=enabled
+kubectl label namespace hipster-shop istio.io/rev=1-19
 kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN" -n hipster-shop
 kubectl apply -f hipstershop/k8s-manifest.yaml -n hipster-shop
-#Deploy the ingress rules
-kubectl apply -f istio/istio_gateway.yaml
+
+#apply Gloo Mesh policies
+kubectl apply -f ./gloo-mesh/connectionpolicy.yaml
+kubectl apply -f ./gloo-mesh/outlierdetectionpolicy.yaml
+kubectl apply -f ./gloo-mesh/retrytimeoutpolicy.yaml
 
 
 kubectl apply -f k6/loadtest_job.yaml -n hipster-shop

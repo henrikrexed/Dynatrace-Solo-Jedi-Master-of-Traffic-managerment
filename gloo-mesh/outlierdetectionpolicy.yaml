@@ -1,0 +1,16 @@
+apiVersion: resilience.policy.gloo.solo.io/v2
+kind: OutlierDetectionPolicy
+metadata:
+  name: outlier-detection
+  namespace: hipster-shop
+spec:
+  applyToDestinations:
+  - kind: SERVICE
+    selector:
+      labels:
+        app: productcatalog
+  config:
+    consecutiveErrors: 1
+    interval: 1s
+    baseEjectionTime: 3m
+    maxEjectionPercent: 100

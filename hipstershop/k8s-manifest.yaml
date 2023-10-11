@@ -367,6 +367,7 @@ metadata:
   name: frontend
   labels:
     dt.owner: hipster-shop
+    app: frontend
 spec:
   type: ClusterIP
   selector:
@@ -588,6 +589,7 @@ metadata:
   name: productcatalogservice
   labels:
     dt.owner: hipster-shop
+    app: productcatalog
 spec:
   type: ClusterIP
   selector:

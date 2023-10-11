@@ -1,0 +1,17 @@
+apiVersion: resilience.policy.gloo.solo.io/v2
+kind: ConnectionPolicy
+metadata:
+  name: connection
+  namespace: hipster-shop
+spec:
+  applyToDestinations:
+  - kind: SERVICE
+    selector:
+      labels:
+        app: productcatalog
+  config:
+    tcp:
+      maxConnections: 1
+    http:
+      maxPendingRequests: 1
+      maxRequestsPerConnection: 1
