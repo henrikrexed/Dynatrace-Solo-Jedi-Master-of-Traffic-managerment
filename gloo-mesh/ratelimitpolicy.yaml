@@ -49,7 +49,7 @@ apiVersion: trafficcontrol.policy.gloo.solo.io/v2
 kind: RateLimitPolicy
 metadata:
   name: ratelimt-policy
-  namespace: bookinfo-frontends
+  namespace: hipster-shop
 spec:
   applyToDestinations:
   - port:

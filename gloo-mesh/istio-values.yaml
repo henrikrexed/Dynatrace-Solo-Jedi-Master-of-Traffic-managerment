@@ -3,8 +3,8 @@ kind: IstioOperator
 spec:
   profile: minimal
   revision: 1-19
-  # hub: us-docker.pkg.dev/gloo-mesh/istio-workshops
-  # tag: 1.19.1-solo
+  hub: us-docker.pkg.dev/gloo-mesh/istio-workshops
+  tag: 1.19.1-solo
   meshConfig:
     enableTracing: true
     accessLogFile: /dev/stdout
