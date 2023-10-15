@@ -2,7 +2,7 @@ apiVersion: admin.gloo.solo.io/v2
 kind: RateLimitServerSettings
 metadata:
   name: settings
-  namespace: gloo-mesh-addons
+  namespace: hipster-shop
 spec:
   destinationServer:
     ref:

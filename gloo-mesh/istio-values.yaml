@@ -13,7 +13,7 @@ spec:
     extensionProviders:
       - name: envoyOtelAls
         envoyOtelAls:
-          service: "gloo-telemetry-collector.gloo-mesh.svc.cluster.local"
+          service: "gloo-telemetry-collector.gloo-mesh.svc"
           port: "4317"
           logFormat:
             text: |
@@ -33,7 +33,7 @@ spec:
               "xForwardedClientCert" : "%REQ(x-forwarded-client-cert)%"
       - name: otel
         opentelemetry:
-          service: gloo-telemetry-collector.gloo-mesh.svc.cluster.local
+          service: gloo-telemetry-collector.gloo-mesh.svc
           port: 4317
     defaultProviders:
       accessLogging:
