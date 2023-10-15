@@ -1,0 +1,72 @@
+apiVersion: admin.gloo.solo.io/v2
+kind: RateLimitServerSettings
+metadata:
+  name: settings
+  namespace: gloo-mesh-addons
+spec:
+  destinationServer:
+    ref:
+      cluster: mgmt-cluster
+      name: rate-limiter
+      namespace: gloo-mesh-addons
+    port:
+      name: grpc
+---
+apiVersion: trafficcontrol.policy.gloo.solo.io/v2
+kind: RateLimitClientConfig
+metadata:
+  name: client-config
+  namespace: hipster-shop
+spec:
+  raw:
+    rateLimits:
+    - actions:
+      - genericKey:
+          descriptorValue: counter
+---
+apiVersion: admin.gloo.solo.io/v2
+kind: RateLimitServerConfig
+metadata:
+  name: server-config
+  namespace: hipster-shop
+spec:
+  destinationServers:
+  - ref:
+      cluster: mgmt-cluster
+      name: rate-limiter
+      namespace: gloo-mesh-addons
+    port:
+      name: grpc
+  raw:
+    descriptors:
+    - key: generic_key
+      rateLimit:
+        requestsPerUnit: 3
+        unit: MINUTE
+      value: counter
+---
+apiVersion: trafficcontrol.policy.gloo.solo.io/v2
+kind: RateLimitPolicy
+metadata:
+  name: ratelimt-policy
+  namespace: bookinfo-frontends
+spec:
+  applyToDestinations:
+  - port:
+      number: 80
+    selector:
+      labels:
+        app: frontend
+  config:
+    serverSettings:
+      name: settings
+      namespace: hipster-shop
+      cluster: mgmt-cluster
+    ratelimitClientConfig:
+      name: client-config
+      namespace: hipster-shop
+      cluster: mgmt-cluster
+    ratelimitServerConfig:
+      name: server-config
+      namespace: hipster-shop
+      cluster: mgmt-cluster
