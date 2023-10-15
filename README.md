@@ -58,10 +58,12 @@ cd Dynatrace-Solo-Jedi-Master-of-Traffic-managerment
 
 ### 1. Label Nodes
 
+```shell
 kubectl get nodes -o wide
 kubectl label <nodename1> node-type=observability
 kubectl label <nodename2> node-type=worker
 kubectl label <nodename3> node-type=worker
+```
 
 #### 1.1. Dynatrace
 
@@ -174,6 +176,7 @@ export CLUSTER_CONTEXT=$(kubectl config current-context)
 kubectl create ns gloo-mesh-addons
 kubectl label namespace gloo-mesh-addons istio.io/rev=1-19
 
+kubectl create ns gloo-mesh
 kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN"  -n gloo-mesh
 
 meshctl install \
@@ -186,6 +189,7 @@ meshctl install \
 Apply gloo mesh resources to create a multi-tenant environment:
 
 ```shell
+kubectl create ns hipster-shop
 kubectl apply -f ./gloo-mesh/gloomesh-resources.yaml
 ```
 
