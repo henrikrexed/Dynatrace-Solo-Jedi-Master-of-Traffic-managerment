@@ -308,7 +308,7 @@ kubectl apply -f hipstershop/productcatalog_v2.yaml -n hipster-shop
 Then we want to create the traffic split rule where 80% of the traffic will be sent to the v1.0 and 20% to v1.1
 
 ```shell
-kubectl apply -f ./gloo-mesh/traficsplit.yaml -n hipster-shop
+kubectl apply -f ./gloo-mesh/trafficsplit.yaml -n hipster-shop
 ```
 
 ## Chaos Experiments
