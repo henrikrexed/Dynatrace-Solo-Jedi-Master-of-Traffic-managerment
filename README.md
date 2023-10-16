@@ -56,14 +56,6 @@ cd Dynatrace-Solo-Jedi-Master-of-Traffic-managerment
 
 ## Deploy
 
-### 1. Label Nodes
-
-```shell
-kubectl get nodes -o wide
-kubectl label <nodename1> node-type=observability
-kubectl label <nodename2> node-type=worker
-kubectl label <nodename3> node-type=worker
-```
 
 #### 1.1. Dynatrace
 
@@ -177,7 +169,7 @@ kubectl create ns gloo-mesh-addons
 kubectl label namespace gloo-mesh-addons istio.io/rev=1-19
 
 kubectl create ns gloo-mesh
-kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN"  -n gloo-mesh
+kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="${DT_TENANT_URL}" --from-literal=dt_api_token="${DATA_INGEST_TOKEN}"  -n gloo-mesh
 
 meshctl install \
   --kubecontext $CLUSTER_CONTEXT \
@@ -196,7 +188,7 @@ kubectl apply -f ./gloo-mesh/gloomesh-resources.yaml
 Now you can access the Gloo Mesh UI using the following command where you will the find workspaces, services and policies:
 
 ```shell
-UI=$(kubectl --context demo-gloo-eks get svc -n gloo-mesh gloo-mesh-ui -ojsonpath='{.status.loadBalancer.ingress[0].*}')
+UI=$(kubectl --context "${CLUSTER_CONTEXT}" get svc -n gloo-mesh gloo-mesh-ui -ojsonpath='{.status.loadBalancer.ingress[0].*}')
 echo "http://$UI"
 ```
 

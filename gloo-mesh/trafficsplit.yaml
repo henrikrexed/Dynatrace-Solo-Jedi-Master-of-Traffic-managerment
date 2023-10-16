@@ -26,6 +26,7 @@ spec:
               number: 3550
             subset:
               app.kubernetes.io/version: "1.0.0"
+            weight: 80
           - ref:
               name: productcatalogservice
               namespace: hipster-shop
@@ -33,3 +34,4 @@ spec:
               number: 3550
             subset:
               app.kubernetes.io/version: "1.1.0"
+            weight: 20

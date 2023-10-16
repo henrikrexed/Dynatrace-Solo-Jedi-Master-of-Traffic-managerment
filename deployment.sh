@@ -75,16 +75,6 @@ if [ -z "$DTOPERATORTOKEN" ]; then
   exit 1
 fi
 
-#### Deploy the cert-manager
-echo "Deploying Cert Manager ( for OpenTelemetry Operator)"
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.10.0/cert-manager.yaml
-# Wait for pod webhook started
-kubectl wait pod -l app.kubernetes.io/component=webhook -n cert-manager --for=condition=Ready --timeout=2m
-# Deploy the opentelemetry operator
-sleep 10
-echo "Deploying the OpenTelemetry Operator"
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
-
 ### get the ip adress of ingress ####
 IP=""
 while [ -z $IP ]; do
@@ -109,24 +99,16 @@ sed -i "s,CLUSTER_NAME_TO_REPLACE,$CLUSTERNAME,"  dynatrace/dynakube.yaml
 kubectl apply -f dynatrace/dynakube.yaml -n dynatrace
 
 
-# Deploy collector
-kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN"
-kubectl apply -f opentelemetry/rbac.yaml
-kubectl apply -f opentelemetry/openTelemetry-manifest_debut.yaml
-
-
 #deploy demo application
 kubectl create ns hipster-shop
 kubectl label namespace hipster-shop istio.io/rev=1-19
 kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=dt_api_token="$DTTOKEN" -n hipster-shop
 kubectl apply -f hipstershop/k8s-manifest.yaml -n hipster-shop
+kubectl apply -f ./gloo-mesh/gloomesh-resources.yaml
 
 # Load test
 kubectl apply -f k6/loadtest_job.yaml -n hipster-shop
 
-#### Deploy Litmus
-kubectl create ns litmus
-helm install chaos litmuschaos/litmus --namespace=litmus --set upgradeAgent.nodeSelector.node-type=observability	 --set portal.server.nodeSelector.node-type=observability --set portal.frontend.nodeSelector.node-type=observability  --set mongo.nodeSelector.node-type=observability
 
 #Deploy the ingress rules
 echo "--------------Demo--------------------"

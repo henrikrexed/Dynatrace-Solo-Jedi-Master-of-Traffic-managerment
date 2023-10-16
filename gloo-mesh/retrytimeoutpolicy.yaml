@@ -9,7 +9,7 @@ spec:
         labels:
           retry: enabled
   config:
-    requestTimeout: 1s
+    requestTimeout: 2s
 ---
 apiVersion: networking.gloo.solo.io/v2
 kind: RouteTable
