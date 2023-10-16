@@ -300,10 +300,6 @@ spec:
         metrics.dynatrace.com/port: '15020'
         metrics.dynatrace.com/scrape: 'true'
         metrics.dynatrace.com/path: '/stats/prometheus'
-        proxy.istio.io/config: |-
-          proxyStatsMatcher:
-            inclusionRegexps:
-            - ".*http_local_rate_limit.*"
     spec:
       containers:
         - name: server
