@@ -88,6 +88,20 @@ telemetryCollectorCustomization:
       exporters: 
         - logging/mesh
         - otlp
+  pipelines:
+    metrics/ui:
+      pipeline:
+        exporters:
+          - otlp
+        processors:
+          - memory_limiter
+          # - filter/min
+          - batch
+          # - attributes/drop_extra_istio_labels
+          - attributes/drop_extra_otel_labels
+          - gloo_metrics_processor
+        receivers:
+          - prometheus
 telemetryGatewayCustomization:
   extraExporters:
     logging/mesh:

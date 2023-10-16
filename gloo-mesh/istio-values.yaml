@@ -41,6 +41,14 @@ spec:
       tracing:
         - otel
     defaultConfig:
+      proxyStatsMatcher:
+        inclusionRegexps:
+          - ".*outlier_detection.*"
+          - ".*upstream_rq_retry.*"
+          - ".*upstream_cx_.*"
+          - ".*http_local_rate_limit.*"
+        inclusionSuffixes:
+          - "upstream_rq_timeout"
       tracing: {} # disabled MeshConfig tracing options
       holdApplicationUntilProxyStarts: true
       proxyMetadata:
