@@ -249,6 +249,9 @@ fetch logs //, scanLimitGBytes: 500, samplingRatio: 1000
 | filter response_code_detaiuls =="max_duration_timeout"
 | summarize count() , by: {bin(timestamp, 30s),k8s.deployment.name}
 ```
+As a consequence we could Graph the number request in timeout
+<p align="center"><img src="/image/request_timeout.png" width="40%" alt="data token" /></p>
+
 ### 2. Rate Limit
 
 To illustrate the usage of the rate limit we won't apply it on the productcatalog service, because it receives a limited workload.
@@ -273,9 +276,8 @@ fetch logs //, scanLimitGBytes: 500, samplingRatio: 1000
 | filter response_code_detaiuls == "request_rate_limited"
 | summarize count() , by: {bin(timestamp, 30s),k8s.deployment.name}
 ```
-
 As a consequence we could Graph the number request that has been rate limit
-<p align="center"><img src="/image/rate_limit_metric.png" width="40%" alt="data token" /></p>
+<p align="center"><img src="/image/rate_limit_graph.png" width="40%" alt="data token" /></p>
 
 With the metric `ratelimit_solo_io_total_hits` you can then imagine to create alerts once the value is above A or 10.
 
