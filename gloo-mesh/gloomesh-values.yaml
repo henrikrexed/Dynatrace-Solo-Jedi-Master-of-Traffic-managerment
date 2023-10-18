@@ -181,13 +181,11 @@ telemetryGatewayCustomization:
       processors: [memory_limiter, batch]
       exporters: 
         - otlphttp/dt
-        - logging/mesh
     traces/dt: 
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters:
         - otlphttp/dt
-        - logging/mesh
     metrics/dt:
       receivers:
         - otlp
@@ -196,4 +194,4 @@ telemetryGatewayCustomization:
       processors: [memory_limiter, filter, cumulativetodelta, batch]
       exporters:
         - otlphttp/dt
-        - logging/mesh
+
