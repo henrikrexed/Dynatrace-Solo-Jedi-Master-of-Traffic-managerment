@@ -303,7 +303,7 @@ or you watch the rejected request using the following command :
 ```bash
 watch "istioctl pc ep deploy/frontend -n hipster-shop | grep product"
 ```
-u
+
 ### 4. Traffic Split
 
 let's deploy the v1.1.0 resolving the latency issue on the productcatalog service
