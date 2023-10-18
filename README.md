@@ -12,9 +12,6 @@ In this demo we will walk through the usage of Configuring Gloo Platform with:
 
 * The hipster-shop
 
-To reproduce well know production issue this workshop we will utilize:
-
-* Litmus Chaos to generate disruption in the Cluster
 
 ## Prerequisite
 
